@@ -1,3 +1,5 @@
+# Midi2DataLibrary
+
 This is a modificated version of the Midi2Texte application :https://github.com/Yxven/Midi2Text to work without GUI as a library an add the possibility to work with a java object instead of text File
 
 
