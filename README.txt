@@ -5,3 +5,10 @@ This is a modificated version of the Midi2Texte application :https://github.com/
 
 This program includes JMusic1.6.4.jar which was originally found here: http://sourceforge.net/projects/jmusic/files/jMusic_Stable/ and is licensed
 under GPLv2.
+
+**Usage**
+
+File file = new File("c:/midiFile.mid");
+MidiToData midi2Data = new MidiToData();
+MidiContainer myMidiContainer =midi2Data.convert(file);
+Note[] noteArray= midiContainer.getNoteArrays(73); //get notes for instruments 73 if exist
