@@ -9,6 +9,9 @@ under GPLv2.
 ## Usage
 
 File file = new File("c:/midiFile.mid");
+
 MidiToData midi2Data = new MidiToData();
+
 MidiContainer myMidiContainer =midi2Data.convert(file);
+
 Note[] noteArray= midiContainer.getNoteArrays(73); //get notes for instruments 73 if exist
