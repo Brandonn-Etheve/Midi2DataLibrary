@@ -18,3 +18,7 @@ MidiContainer myMidiContainer =midi2Data.convert(file);
 
 Note[] noteArray= midiContainer.getNoteArrays(73); //get notes for instruments 73 if exist
 ```
+
+### Ps: 
+
+javadoc may need to be updated
