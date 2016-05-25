@@ -17,7 +17,15 @@
 package midi2Data;
 
 import exception.InstrumentNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
@@ -31,7 +39,33 @@ public class MidiContainer {
    private String title,timeSignature,keyQuality;
    double beatsPerMinute,longuestRhytmValue,shortestRhytmValue;
    int keySignature;
-   Enumeration  partList;
+   LinkedList<Part>  partList;
+   
+   private final static String[] INSTRUMENT_NAME =new String[]
+   {
+       "Acoustic Grand Piano", "Bright Acoustic Piano", "Electric Grand Piano", "Honky-tonk Piano",
+       "Rhodes Piano", "Chorused Piano", "Harpsichord", "Clavinet", "Celesta", "Glockenspiel",
+       "Music Box", "Vibraphone", "Marimba", "Xylophone", "Tubular Bells", "Dulcimer", "Hammond Organ",
+       "Percussive Organ", "Rock Organ", "Church Organ", "Reed Organ", "Accordion", "Harmonica",
+       "Tango Accordion", "Acoustic Nylon Guitar", "Acoustic Steel Guitar", "Electric Jazz Guitar", 
+       "Electric Clean Guitar", "Electric Muted Guitar", "Overdriven Guitar", "Distortion Guitar", 
+       "Guitar Harmonics", "Acoustic Bass", "Fingered Electric Bass", "Plucked Electric Bass", 
+       "Fretless Bass", "Slap Bass 1", "Slap Bass 2", "Synth Bass 1", "Synth Bass 2", "Violin", 
+       "Viola", "Cello", "Contrabass", "Tremolo Strings", "Pizzicato Strings", "Orchestral Harp", 
+       "Timpani", "String Ensemble 1", "String Ensemble 2", "Synth Strings 1", "Synth Strings 2", 
+       "Choir \"Aah\"", "Choir \"Ooh\"", "Synth Voice", "Orchestral Hit", "Trumpet", "Trombone", "Tuba",
+       "Muted Trumpet", "French Horn", "Brass Section", "Synth Brass 1", "Synth Brass 2", "Soprano Sax", 
+       "Alto Sax", "Tenor Sax", "Baritone Sax", "Oboe", "English Horn", "Bassoon", "Clarinet", "Piccolo",
+       "Flute", "Recorder", "Pan Flute", "Bottle Blow", "Shakuhachi", "Whistle", "Ocarina", "Square Wave Lead",
+       "Sawtooth Wave Lead", "Calliope Lead", "Chiff Lead", "Charang Lead", "Voice Lead", "Fifths Lead",
+       "Bass Lead", "New Age Pad", "Warm Pad", "Polysynth Pad", "Choir Pad", "Bowed Pad", "Metallic Pad",
+       "Halo Pad", "Sweep Pad", "Rain Effect", "Soundtrack Effect", "Crystal Effect", "Atmosphere Effect",
+       "Brightness Effect", "Goblins Effect", "Echoes Effect", "Sci-Fi Effect", "Sitar", "Banjo", "Shamisen",
+       "Koto", "Kalimba", "Bagpipe", "Fiddle", "Shanai", "Tinkle Bell", "Agogo", "Steel Drums", "Woodblock",
+       "Taiko Drum", "Melodic Tom", "Synth Drum", "Reverse Cymbal", "Guitar Fret Noise", "Breath Noise",
+       "Seashore", "Bird Tweet", "Telephone Ring", "Helicopter", "Applause"
+   };
+   
     public MidiContainer(){
         
     }
@@ -66,10 +100,16 @@ public class MidiContainer {
     {
         this.shortestRhytmValue=shortestRhytmValue;
     }
-    public void setPartList(Enumeration partList)
+    public void setPartList(Enumeration enumPartList)
     {
-        this.partList=partList;
+        partList=new LinkedList<>();
+        while(enumPartList.hasMoreElements())
+        {
+            partList.add((Part)enumPartList.nextElement());
+        }
+        //this.partList=partList;
     }
+    
     
     public String getTitle()
     {
@@ -101,7 +141,7 @@ public class MidiContainer {
     {
         return shortestRhytmValue;
     }
-    public Enumeration  getPartList()
+    public List  getPartList()
     {
         return partList;
     }  
@@ -114,31 +154,76 @@ public class MidiContainer {
     public Note[] getNoteArrays(double instrumentSearched) throws InstrumentNotFoundException
     {
      
-           
-           Part part = null;
+         
+           //Part part;
            Phrase phrase;
-           Note[] noteArray = null;
+           List <Note> listNote =new ArrayList<>(); 
            Enumeration phraseEnum = null;
            double instrument=-1;
-           while(partList.hasMoreElements()&&instrument!=instrumentSearched)
+           
+           //while(partList.h&& instrument!=instrumentSearched)
+           for(Part part : partList)
            {
-               
-               part = (Part) partList.nextElement();
                phraseEnum= part.getPhraseList().elements();
                instrument=part.getInstrument();
+               if(instrument==instrumentSearched)
+               {
+                   break;
+               }
                //System.out.println(instrument);
            }           
             if(instrument!=instrumentSearched)
             {
                 throw new InstrumentNotFoundException();
             }
+            
            while(phraseEnum.hasMoreElements())
            {
               phrase =(Phrase) phraseEnum.nextElement();
-             noteArray= phrase.getNoteArray();
+            Note[] note= phrase.getNoteArray();
+            listNote.addAll(Arrays.asList(note));
              
            } 
-           
+          Note[] noteArray=new Note[listNote.size()];
+          int i=0;
+           for(Note n : listNote)
+           {
+               noteArray[i]=n;
+               i++;
+           }
            return noteArray;
+    }
+    
+    public static int getInstrumentNumber(String instrument) throws InstrumentNotFoundException
+    {
+        for(int i=0;i<127;i++)
+        {
+            if(INSTRUMENT_NAME[i].equalsIgnoreCase(instrument))
+            {
+                return i;
+            }
+        }
+        throw new InstrumentNotFoundException();
+    }
+    
+    public Map getInstrumentsFound()
+    {
+        Map<String, Integer>  instrumentsFound = new HashMap();
+       
+        for(int i=0;i<127;i++)
+        {
+            try {
+                    Note noteArray[]=getNoteArrays(i);
+                    if(noteArray.length>0)
+                    {
+                        
+                        instrumentsFound.put(INSTRUMENT_NAME[i], noteArray.length);
+                    }  
+           
+                 } catch (InstrumentNotFoundException ex) { }
+        }
+       
+       
+        return instrumentsFound;
     }
 }
